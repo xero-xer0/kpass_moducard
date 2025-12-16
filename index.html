@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-패스 '모두의 카드' 계산기</title>
     <style>
+        /* [PC/기본 스타일] */
         body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f4f6f9; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; transition: background-color 0.3s; }
         .card { background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 25px; margin-bottom: 20px; }
         
@@ -15,45 +16,23 @@
         label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 1.05em; }
         select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; background-color: #fff; cursor: pointer; }
         
-        /* [변경] 기준금액 박스 분리 레이아웃 */
-        .threshold-container {
-            display: flex;
-            gap: 15px; /* 두 박스 사이 간격 */
-            margin-bottom: 30px;
-        }
-
+        /* 기준금액 박스 */
+        .threshold-container { display: flex; gap: 15px; margin-bottom: 30px; }
         .th-box {
-            flex: 1; /* 1:1 비율로 50%씩 차지 */
-            padding: 15px 0;
-            border-radius: 10px;
-            text-align: center;
-            border: 2px solid; /* 테두리 강조 */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            flex: 1; padding: 15px 0; border-radius: 10px; text-align: center;
+            border: 2px solid; display: flex; flex-direction: column; justify-content: center;
         }
-
-        /* 일반형 박스 테마 (Mint/Green) */
-        .th-box.general {
-            background-color: #e6fffa;
-            border-color: #00b894;
-            color: #00796b;
-        }
-        
-        /* 플러스형 박스 테마 (Blue) */
-        .th-box.plus {
-            background-color: #e7f5ff;
-            border-color: #228be6;
-            color: #1864ab;
-        }
-
+        .th-box.general { background-color: #e6fffa; border-color: #00b894; color: #00796b; }
+        .th-box.plus { background-color: #e7f5ff; border-color: #228be6; color: #1864ab; }
         .th-label { font-size: 0.85em; font-weight: normal; margin-bottom: 5px; opacity: 0.9; }
-        .th-value { font-size: 1.3em; font-weight: 800; letter-spacing: -0.5px; } 
+        .th-value { font-size: 1.3em; font-weight: 800; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
 
         /* 컨트롤 레이아웃 */
         .control-layout { display: flex; align-items: flex-start; gap: 15px; }
-        .slider-wrapper { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        .input-wrapper { width: 140px; flex-shrink: 0; position: relative; }
+        .slider-wrapper { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; /* Flexbox 버그 방지 */ }
+        
+        /* 기본 입력창 너비 (PC 기준 140px) */
+        .input-wrapper { width: 140px; flex-shrink: 0; position: relative; transition: width 0.2s; }
 
         input[type="range"] { width: 100%; cursor: pointer; height: 25px; margin: 0 0 8px 0; }
         
@@ -69,10 +48,13 @@
         .unit-text { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #888; font-size: 0.9em; font-weight: normal;}
 
         .btn-group { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; width: 100%; }
+        
+        /* 기본 버튼 스타일 */
         .quick-btn {
             background-color: #f1f3f5; border: 1px solid #e9ecef; color: #495057;
             padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8em; font-weight: 600;
             transition: all 0.15s; flex-grow: 1; max-width: 60px;
+            white-space: nowrap; /* 글자 줄바꿈 금지 */
         }
         .quick-btn:hover { background-color: #e9ecef; }
         .quick-btn:active { transform: scale(0.96); }
@@ -81,7 +63,7 @@
         .quick-btn.plus { color: #228be6; background-color: #e7f5ff; border-color: #d0ebff; }
         .quick-btn.plus:hover { background-color: #d0ebff; }
 
-        /* 테마별 슬라이더 스타일 */
+        /* 테마별 스타일 */
         .section-general label { color: #009688; }
         .section-general input[type="range"] { accent-color: #00b894; }
         .section-general input[type="number"]:focus { border-color: #00b894; }
@@ -101,11 +83,9 @@
         .result-box.theme-basic { background-color: #f8f9fa; border-color: #343a40; }
         .result-box.theme-basic .badge { background-color: #343a40; }
         .result-box.theme-basic .highlight-text { color: #343a40; }
-        
         .result-box.theme-general { background-color: #e6fffa; border-color: #00b894; }
         .result-box.theme-general .badge { background-color: #00b894; }
         .result-box.theme-general .highlight-text { color: #00b894; }
-
         .result-box.theme-plus { background-color: #e7f5ff; border-color: #228be6; }
         .result-box.theme-plus .badge { background-color: #228be6; }
         .result-box.theme-plus .highlight-text { color: #228be6; }
@@ -128,12 +108,35 @@
         .comparison-table th { background-color: #f8f9fa; color: #666; font-weight: 600; }
         .winner-row { background-color: #fff9db; font-weight: bold; }
 
-        @media (max-width: 450px) {
-            .equation-wrapper { gap: 2px; }
-            .eq-operator { margin: 15px 2px 0 2px; font-size: 1.2em; }
-            .eq-value.highlight-text { font-size: 1.8em; }
-            .eq-value { font-size: 1em; }
-            .quick-btn { padding: 8px 6px; font-size: 0.75em; }
+        /* [모바일 전용 최적화] - 화면 너비 768px 이하일 때 적용 */
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .card { padding: 20px 15px; }
+            
+            /* 1. 입력창 너비 대폭 축소 (140px -> 90px) */
+            .input-wrapper { width: 90px; } 
+            input[type="number"] { font-size: 16px; padding: 10px 5px; padding-right: 22px; } /* 내부 패딩 조절 */
+            .unit-text { right: 5px; font-size: 0.8em; }
+
+            /* 2. 버튼 한 줄 강제 & 간격 조절 */
+            .btn-group { 
+                flex-wrap: nowrap; /* 줄바꿈 금지 */
+                gap: 3px; /* 버튼 사이 간격 좁힘 */
+            }
+            .quick-btn {
+                font-size: 11px; /* 글자 크기 축소 */
+                padding: 8px 0; /* 좌우 패딩 제거 (공간 확보) */
+                min-width: 0; /* 최소 너비 제한 해제 */
+                flex: 1; /* 모든 버튼이 동일한 너비를 가짐 */
+            }
+
+            /* 레이아웃 간격 조절 */
+            .control-layout { gap: 10px; }
+            .threshold-container { gap: 10px; }
+            
+            /* 결과창 폰트 미세 조정 */
+            .eq-value.highlight-text { font-size: 2em; }
+            .eq-operator { font-size: 1.2em; margin: 10px 2px 0 2px; }
         }
     </style>
 </head>
@@ -205,7 +208,7 @@
         </div>
 
         <div class="form-group section-plus">
-            <label>🚄 플러스 대중교통 <span style="font-weight:normal; font-size:0.85em; opacity: 0.8;">(3천원 이상)</span></label>
+            <label>🚄 플러스 대중교통 <span style="font-weight:normal; font-size:0.85em; opacity: 0.8;">(GTX 등)</span></label>
             
             <div class="control-layout">
                 <div class="slider-wrapper">
