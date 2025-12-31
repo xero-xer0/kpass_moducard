@@ -499,7 +499,7 @@
         <h4>2025년 12월 국토교통부 보도자료 기준</h4>
 
         <div class="form-group">
-            <label>1. 거주 지역</label>
+            <label>1. 주민등록상 거주 지역</label>
             <select id="region" onchange="calculate()">
                 <option value="capital">수도권 (서울/경기/인천)</option>
                 <option value="local">일반 지방권</option>
@@ -509,7 +509,20 @@
         </div>
 
         <div class="form-group">
-            <label>2. 이용자 유형</label>
+            <label>2. 사용 지역 <span style="font-weight:normal; font-size:0.85em; opacity: 0.8;">(기후동행카드
+                    비교용)</span></label>
+            <div style="display: flex; gap: 20px; margin-top: 10px;">
+                <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="usageRegion" value="capital" checked onchange="calculate()"> 수도권
+                </label>
+                <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="usageRegion" value="other" onchange="calculate()"> 그 외
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>3. 이용자 유형</label>
             <select id="userType" onchange="calculate()">
                 <option value="general">일반인 (기본 20%)</option>
                 <option value="youth">청년 (만19~34세, 30%)</option>
@@ -752,14 +765,44 @@
             const kpassRealCost = totalSpend - maxRefund;
             document.getElementById('realCost').textContent = fmt(kpassRealCost);
 
-            // --- 기후동행카드 비교 로직 (수도권 한정) ---
+            // --- 기후동행카드 비교 로직 (사용 지역이 수도권일 때만) ---
             let climateHtml = '';
             let climateRowHtml = '';
 
-            if (region === 'capital') {
+            // 라디오 버튼 값 확인
+            const usageRegion = document.querySelector('input[name="usageRegion"]:checked').value;
+
+            if (usageRegion === 'capital') {
                 // 기후동행카드 가격 (따릉이 제외 기준)
-                // 청년(만19~39세) 55,000원, 그 외 62,000원
-                const climateCardPrice = (userType === 'youth') ? 55000 : 62000;
+                // 일반/어르신: 62,000원
+                // 청년/2자녀: 55,000원 (-7,000)
+                // 3자녀/저소득: 45,000원 (-17,000)
+                let climateCardPrice = 62000;
+                let climateUserLabel = '일반';
+
+                switch (userType) {
+                    case 'youth':
+                        climateCardPrice = 55000;
+                        climateUserLabel = '청년';
+                        break;
+                    case 'child2':
+                        climateCardPrice = 55000;
+                        climateUserLabel = '2자녀';
+                        break;
+                    case 'child3':
+                        climateCardPrice = 45000;
+                        climateUserLabel = '3자녀+';
+                        break;
+                    case 'lowIncome':
+                        climateCardPrice = 45000;
+                        climateUserLabel = '저소득';
+                        break;
+                    case 'senior':
+                        climateUserLabel = '어르신';
+                        break;
+                    default:
+                        climateUserLabel = '일반';
+                }
 
                 // 기후동행 실부담 = 카드값 + 플러스이용금액(별도)
                 const climateRealCost = climateCardPrice + plusSpend;
@@ -781,17 +824,18 @@
                 }
 
                 // 결과 박스 하단 표시용 HTML
+                // [배경색 투명화 요청 반영] background 속성 제거
                 climateHtml = `
                 <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(0,0,0,0.1); width: 100%;">
                     <div style="font-size: 0.95em; color: #555; margin-bottom: 5px;">
                         🎟️ <strong>기후동행카드</strong> 사용 시
                         <span style="font-size: 0.85em; color: #888; font-weight: normal;">
-                            (${userType === 'youth' ? '청년' : '일반'} ${fmt(climateCardPrice)}원 + 플러스 별도)
+                            (${climateUserLabel} ${fmt(climateCardPrice)}원 + 플러스 별도)
                         </span>
                     </div>
                     <div style="font-size: 1.1em; font-weight: bold;">
                         실부담 <span style="font-family: inherit;">${fmt(climateRealCost)}</span>원
-                        <span style="margin-left: 8px; font-size: 0.95em; color: ${diffColor}; background: rgba(255,255,255,0.5); padding: 2px 6px; border-radius: 4px;">
+                        <span style="margin-left: 8px; font-size: 0.95em; color: ${diffColor}; padding: 2px 6px; border-radius: 4px;">
                             (${diffText})
                         </span>
                     </div>
