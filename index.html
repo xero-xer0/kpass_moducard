@@ -1,156 +1,503 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>K-패스 '모두의 카드' 계산기</title>
     <style>
         /* [기본 스타일] */
-        body { 
-            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; 
-            background-color: #f4f6f9; color: #333; 
-            max-width: 600px; margin: 0 auto; padding: 20px; 
+        body {
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
             transition: background-color 0.3s;
             /* 모바일 터치 하이라이트 제거 */
             -webkit-tap-highlight-color: transparent;
         }
-        .card { background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 25px; margin-bottom: 20px; }
-        
-        h2 { text-align: center; color: #004094; margin-bottom: 5px; }
-        h4 { text-align: center; color: #666; font-weight: normal; margin-top: 0; font-size: 0.9em; margin-bottom: 30px; }
-        
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 1.05em; }
-        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; background-color: #fff; cursor: pointer; }
-        
-        /* 기준금액 박스 (테마별 분리) */
-        .threshold-container { display: flex; gap: 15px; margin-bottom: 30px; }
-        .th-box {
-            flex: 1; padding: 15px 0; border-radius: 10px; text-align: center;
-            border: 2px solid; display: flex; flex-direction: column; justify-content: center;
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 20px;
         }
-        .th-box.general { background-color: #e6fffa; border-color: #00b894; color: #00796b; }
-        .th-box.plus { background-color: #e7f5ff; border-color: #228be6; color: #1864ab; }
-        .th-label { font-size: 0.85em; font-weight: normal; margin-bottom: 5px; opacity: 0.9; }
-        .th-value { font-size: 1.3em; font-weight: 800; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
+
+        h2 {
+            text-align: center;
+            color: #004094;
+            margin-bottom: 5px;
+        }
+
+        h4 {
+            text-align: center;
+            color: #666;
+            font-weight: normal;
+            margin-top: 0;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        /* 기준금액 박스 (테마별 분리) */
+        .threshold-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .th-box {
+            flex: 1;
+            padding: 15px 0;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .th-box.general {
+            background-color: #e6fffa;
+            border-color: #00b894;
+            color: #00796b;
+        }
+
+        .th-box.plus {
+            background-color: #e7f5ff;
+            border-color: #228be6;
+            color: #1864ab;
+        }
+
+        .th-label {
+            font-size: 0.85em;
+            font-weight: normal;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+
+        .th-value {
+            font-size: 1.3em;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            font-variant-numeric: tabular-nums;
+        }
 
         /* 컨트롤 레이아웃 */
-        .control-layout { display: flex; align-items: flex-start; gap: 15px; }
-        .slider-wrapper { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-        
-        .input-wrapper { width: 140px; flex-shrink: 0; position: relative; transition: width 0.2s; }
-
-        input[type="range"] { 
-            width: 100%; cursor: pointer; height: 25px; margin: 0 0 8px 0; 
-            /* [확대 방지] 터치 조작 최적화 */
-            touch-action: manipulation; 
+        .control-layout {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
         }
-        
-        input[type="number"] { 
-            width: 100%; padding: 10px 35px 10px 10px; 
-            border: 2px solid #e0e0e0; border-radius: 8px; 
-            font-size: 18px; font-weight: bold; color: #333; text-align: right;
+
+        .slider-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .input-wrapper {
+            width: 140px;
+            flex-shrink: 0;
+            position: relative;
+            transition: width 0.2s;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            height: 25px;
+            margin: 0 0 8px 0;
+            /* [확대 방지] 터치 조작 최적화 */
+            touch-action: manipulation;
+
+            /* [배경색 보정: Hybrid Fix] */
+            /* 1. Native Thumb 유지를 위해 appearance: auto (기본값) 사용 */
+            /* 2. 트랙 배경(Gradient)을 그리기 위한 설정 */
+            /* 3. [Refinement] Chrome에서 Green Accent 시 Black Track 강제 방지 -> Light Mode 강제 */
+            color-scheme: light;
+
+            background-color: transparent;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 100% 4px;
+            /* Native Track과 유사한 두께 */
+        }
+
+        /* [Hue Rotation Fix] Chrome의 Green Accent Black Track 버그 우회 */
+        /* 1. Base를 Blue(#228be6)로 설정하여 깨끗한 트랙을 확보 */
+        /* 2. hue-rotate(-40deg)로 Blue(208) -> Green(168)으로 시각적 변환 */
+        #generalSlider {
+            accent-color: #228be6;
+            filter: hue-rotate(-40deg);
+        }
+
+        /* 3. Chrome의 Native Track(검은색 이슈)은 투명하게 숨김 */
+        input[type="range"]::-webkit-slider-runnable-track {
+            /* [Nuclear Fix] 트랙만 강제로 Native Appearance를 끄고 투명화 */
+            background: transparent;
+        }
+
+        /*
+           원복: 커스텀 트랙/핸들 스타일 제거
+           사용자가 오리지널 디자인을 강력히 원함.
+        */
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            text-align: right;
             box-sizing: border-box;
             font-variant-numeric: tabular-nums;
-            height: 46px; 
+            height: 46px;
             touch-action: manipulation;
         }
-        input[type="number"]:focus { outline: none; }
-        .unit-text { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #888; font-size: 0.9em; font-weight: normal;}
 
-        .btn-group { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; width: 100%; }
-        
+        input[type="number"]:focus {
+            outline: none;
+        }
+
+        .unit-text {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 0.9em;
+            font-weight: normal;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            width: 100%;
+        }
+
         .quick-btn {
-            background-color: #f1f3f5; border: 1px solid #e9ecef; color: #495057;
-            padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8em; font-weight: 600;
-            transition: all 0.1s; flex-grow: 1; max-width: 60px;
+            background-color: #f1f3f5;
+            border: 1px solid #e9ecef;
+            color: #495057;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: 600;
+            transition: all 0.1s;
+            flex-grow: 1;
+            max-width: 60px;
             white-space: nowrap;
             /* [확대 방지] 더블탭 줌 비활성화 */
-            touch-action: manipulation; 
-            user-select: none; -webkit-user-select: none;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
         }
-        .quick-btn:hover { background-color: #e9ecef; }
-        .quick-btn:active { transform: scale(0.96); background-color: #dee2e6; }
-        .quick-btn.minus { color: #fa5252; background-color: #fff5f5; border-color: #ffe3e3; }
-        .quick-btn.minus:hover { background-color: #ffe3e3; }
-        .quick-btn.plus { color: #228be6; background-color: #e7f5ff; border-color: #d0ebff; }
-        .quick-btn.plus:hover { background-color: #d0ebff; }
+
+        .quick-btn:hover {
+            background-color: #e9ecef;
+        }
+
+        .quick-btn:active {
+            transform: scale(0.96);
+            background-color: #dee2e6;
+        }
+
+        .quick-btn.minus {
+            color: #fa5252;
+            background-color: #fff5f5;
+            border-color: #ffe3e3;
+        }
+
+        .quick-btn.minus:hover {
+            background-color: #ffe3e3;
+        }
+
+        .quick-btn.plus {
+            color: #228be6;
+            background-color: #e7f5ff;
+            border-color: #d0ebff;
+        }
+
+        .quick-btn.plus:hover {
+            background-color: #d0ebff;
+        }
 
         /* 테마별 스타일 */
-        .section-general label { color: #009688; }
-        .section-general input[type="range"] { accent-color: #00b894; }
-        .section-general input[type="number"]:focus { border-color: #00b894; }
-        .section-general .quick-btn.plus { color: #009688; background-color: #e0f2f1; border-color: #b2dfdb; }
-        .section-general .quick-btn.plus:hover { background-color: #b2dfdb; }
+        .section-general label {
+            color: #009688;
+        }
 
-        .section-plus label { color: #1971c2; }
-        .section-plus input[type="range"] { accent-color: #228be6; }
-        .section-plus input[type="number"]:focus { border-color: #228be6; }
+        .section-general input[type="range"] {
+            accent-color: #00b894;
+        }
+
+        .section-general input[type="number"]:focus {
+            border-color: #00b894;
+        }
+
+        .section-general .quick-btn.plus {
+            color: #009688;
+            background-color: #e0f2f1;
+            border-color: #b2dfdb;
+        }
+
+        .section-general .quick-btn.plus:hover {
+            background-color: #b2dfdb;
+        }
+
+        .section-plus label {
+            color: #1971c2;
+        }
+
+        .section-plus input[type="range"] {
+            accent-color: #228be6;
+        }
+
+        .section-plus input[type="number"]:focus {
+            border-color: #228be6;
+        }
 
         /* 결과 박스 */
-        .result-box { 
-            border-radius: 12px; padding: 25px 15px; text-align: center; border: 2px solid; 
-            min-height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        .result-box {
+            border-radius: 12px;
+            padding: 25px 15px;
+            text-align: center;
+            border: 2px solid;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             transition: all 0.4s ease;
         }
-        .result-box.theme-basic { background-color: #f8f9fa; border-color: #343a40; }
-        .result-box.theme-basic .badge { background-color: #343a40; }
-        .result-box.theme-basic .highlight-text { color: #343a40; }
-        .result-box.theme-general { background-color: #e6fffa; border-color: #00b894; }
-        .result-box.theme-general .badge { background-color: #00b894; }
-        .result-box.theme-general .highlight-text { color: #00b894; }
-        .result-box.theme-plus { background-color: #e7f5ff; border-color: #228be6; }
-        .result-box.theme-plus .badge { background-color: #228be6; }
-        .result-box.theme-plus .highlight-text { color: #228be6; }
 
-        .badge { 
-            padding: 6px 15px; border-radius: 20px; color: white; font-size: 0.9em; font-weight: bold; margin-bottom: 20px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: background-color 0.4s;
+        .result-box.theme-basic {
+            background-color: #f8f9fa;
+            border-color: #343a40;
         }
 
-        .equation-wrapper { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; width: 100%; }
-        .eq-item { display: flex; flex-direction: column; align-items: center; }
-        .eq-label { font-size: 0.75em; color: #777; margin-bottom: 4px; }
-        .eq-value { font-size: 1.1em; font-weight: 600; color: #555; font-variant-numeric: tabular-nums; }
-        .eq-operator { font-size: 1.5em; color: #adb5bd; margin: 15px 5px 0 5px; font-weight: 300; }
-        .eq-value.highlight-text { font-size: 2.4em; font-weight: 800; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .eq-value.final-cost { font-size: 1.3em; font-weight: 800; color: #333; text-decoration: underline; text-decoration-color: #ddd; text-underline-offset: 4px; }
+        .result-box.theme-basic .badge {
+            background-color: #343a40;
+        }
 
-        .comparison-table { width: 100%; margin-top: 25px; border-collapse: collapse; font-size: 0.9em; table-layout: fixed; }
-        .comparison-table th, .comparison-table td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; font-variant-numeric: tabular-nums; }
-        .comparison-table th { background-color: #f8f9fa; color: #666; font-weight: 600; }
-        .winner-row { background-color: #fff9db; font-weight: bold; }
+        .result-box.theme-basic .highlight-text {
+            color: #343a40;
+        }
+
+        .result-box.theme-general {
+            background-color: #e6fffa;
+            border-color: #00b894;
+        }
+
+        .result-box.theme-general .badge {
+            background-color: #00b894;
+        }
+
+        .result-box.theme-general .highlight-text {
+            color: #00b894;
+        }
+
+        .result-box.theme-plus {
+            background-color: #e7f5ff;
+            border-color: #228be6;
+        }
+
+        .result-box.theme-plus .badge {
+            background-color: #228be6;
+        }
+
+        .result-box.theme-plus .highlight-text {
+            color: #228be6;
+        }
+
+        .badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.4s;
+        }
+
+        .equation-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .eq-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .eq-label {
+            font-size: 0.75em;
+            color: #777;
+            margin-bottom: 4px;
+        }
+
+        .eq-value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #555;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .eq-operator {
+            font-size: 1.5em;
+            color: #adb5bd;
+            margin: 15px 5px 0 5px;
+            font-weight: 300;
+        }
+
+        .eq-value.highlight-text {
+            font-size: 2.4em;
+            font-weight: 800;
+            line-height: 1;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .eq-value.final-cost {
+            font-size: 1.3em;
+            font-weight: 800;
+            color: #333;
+            text-decoration: underline;
+            text-decoration-color: #ddd;
+            text-underline-offset: 4px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            table-layout: fixed;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .comparison-table th {
+            background-color: #f8f9fa;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .winner-row {
+            background-color: #fff9db;
+            font-weight: bold;
+        }
 
         /* [모바일 최적화] 화면 너비 768px 이하 */
         @media (max-width: 768px) {
-            body { padding: 15px; }
-            .card { padding: 20px 15px; }
-            
-            /* 입력창 너비 축소 */
-            .input-wrapper { width: 90px; } 
-            input[type="number"] { font-size: 16px; padding: 10px 5px; padding-right: 22px; }
-            .unit-text { right: 5px; font-size: 0.8em; }
-
-            /* 버튼 한 줄 강제 & 간격 조절 */
-            .btn-group { flex-wrap: nowrap; gap: 3px; }
-            .quick-btn {
-                font-size: 11px; padding: 10px 0; /* 터치 영역 확보 */
-                min-width: 0; flex: 1;
+            body {
+                padding: 15px;
             }
 
-            .control-layout { gap: 10px; }
-            .threshold-container { gap: 10px; }
-            .eq-value.highlight-text { font-size: 2em; }
-            .eq-operator { font-size: 1.2em; margin: 10px 2px 0 2px; }
+            .card {
+                padding: 20px 15px;
+            }
+
+            /* 입력창 너비 축소 */
+            .input-wrapper {
+                width: 90px;
+            }
+
+            input[type="number"] {
+                font-size: 16px;
+                padding: 10px 5px;
+                padding-right: 22px;
+            }
+
+            .unit-text {
+                right: 5px;
+                font-size: 0.8em;
+            }
+
+            /* 버튼 한 줄 강제 & 간격 조절 */
+            .btn-group {
+                flex-wrap: nowrap;
+                gap: 3px;
+            }
+
+            .quick-btn {
+                font-size: 11px;
+                padding: 10px 0;
+                /* 터치 영역 확보 */
+                min-width: 0;
+                flex: 1;
+            }
+
+            .control-layout {
+                gap: 10px;
+            }
+
+            .threshold-container {
+                gap: 10px;
+            }
+
+            .eq-value.highlight-text {
+                font-size: 2em;
+            }
+
+            .eq-operator {
+                font-size: 1.2em;
+                margin: 10px 2px 0 2px;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="card">
         <h2>K-패스 모두의 카드 계산기</h2>
         <h4>2025년 12월 국토교통부 보도자료 기준</h4>
-        
+
         <div class="form-group">
             <label>1. 거주 지역</label>
             <select id="region" onchange="calculate()">
@@ -178,7 +525,7 @@
                 <span class="th-label">🚌 일반형 공제기준</span>
                 <span class="th-value" id="limitGenDisplay">62,000원</span>
             </div>
-            
+
             <div class="th-box plus">
                 <span class="th-label">🚄 플러스형 공제기준</span>
                 <span class="th-value" id="limitPlusDisplay">100,000원</span>
@@ -189,12 +536,12 @@
 
         <div class="form-group section-general">
             <label>🚌 일반 대중교통 <span style="font-weight:normal; font-size:0.85em; opacity: 0.8;">(3천원 미만)</span></label>
-            
+
             <div class="control-layout">
                 <div class="slider-wrapper">
-                    <input type="range" id="generalSlider" min="0" max="300000" step="1000" value="60000" 
-                           oninput="syncValues('general', 'slider')">
-                    
+                    <input type="range" id="generalSlider" min="0" max="300000" step="1000" value="60000"
+                        oninput="syncValues('general', 'slider')">
+
                     <div class="btn-group">
                         <button class="quick-btn minus" onclick="adjustValue('general', -10000)">-1만</button>
                         <button class="quick-btn minus" onclick="adjustValue('general', -5000)">-5천</button>
@@ -205,8 +552,8 @@
                     </div>
                 </div>
                 <div class="input-wrapper">
-                    <input type="number" id="generalInput" value="60000" step="100" 
-                           oninput="syncValues('general', 'input')">
+                    <input type="number" id="generalInput" value="60000" step="100"
+                        oninput="syncValues('general', 'input')">
                     <span class="unit-text">원</span>
                 </div>
             </div>
@@ -214,12 +561,12 @@
 
         <div class="form-group section-plus">
             <label>🚄 플러스 대중교통 <span style="font-weight:normal; font-size:0.85em; opacity: 0.8;">(GTX 등)</span></label>
-            
+
             <div class="control-layout">
                 <div class="slider-wrapper">
-                    <input type="range" id="plusSlider" min="0" max="300000" step="1000" value="0" 
-                           oninput="syncValues('plus', 'slider')">
-                           
+                    <input type="range" id="plusSlider" min="0" max="300000" step="1000" value="0"
+                        oninput="syncValues('plus', 'slider')">
+
                     <div class="btn-group">
                         <button class="quick-btn minus" onclick="adjustValue('plus', -10000)">-1만</button>
                         <button class="quick-btn minus" onclick="adjustValue('plus', -5000)">-5천</button>
@@ -230,8 +577,7 @@
                     </div>
                 </div>
                 <div class="input-wrapper">
-                    <input type="number" id="plusInput" value="0" step="100" 
-                           oninput="syncValues('plus', 'input')">
+                    <input type="number" id="plusInput" value="0" step="100" oninput="syncValues('plus', 'input')">
                     <span class="unit-text">원</span>
                 </div>
             </div>
@@ -241,26 +587,32 @@
     <div class="card">
         <div id="resultBox" class="result-box theme-basic">
             <div class="badge" id="appliedMethodBadge">계산 결과</div>
-            
+
             <div class="equation-wrapper">
                 <div class="eq-item">
                     <div class="eq-label">총 지출</div>
                     <div class="eq-value" id="totalSpend">0</div>
                 </div>
-                
+
                 <div class="eq-operator">-</div>
-                
+
                 <div class="eq-item">
                     <div class="eq-label">예상 환급금</div>
                     <div class="eq-value highlight-text" id="refundAmount">0</div>
                 </div>
-                
+
                 <div class="eq-operator">=</div>
-                
+
                 <div class="eq-item">
                     <div class="eq-label">실제 부담금</div>
                     <div class="eq-value final-cost" id="realCost">0</div>
                 </div>
+            </div>
+
+            <!-- [15회 미만 경고 문구] -->
+            <div id="warning-msg"
+                style="display:none; color: #e67e22; font-size: 0.9em; margin-top: 15px; width: 100%; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px; font-weight: 600;">
+                💡 월 15회 미만 이용 시 적립되지 않습니다 (가입 첫 달 제외)
             </div>
         </div>
 
@@ -279,101 +631,217 @@
             </thead>
             <tbody id="comparisonBody"></tbody>
         </table>
-        
+
         <p style="text-align: center; color: #aaa; font-size: 0.8em; margin-top: 20px;">
             *본 시뮬레이션 결과는 예상치이며 실제와 다를 수 있습니다.
         </p>
     </div>
 
-<script>
-    const thresholds = {
-        capital: { g1: [62000, 100000], g2: [55000, 90000], g3: [45000, 80000] },
-        local: { g1: [55000, 95000], g2: [50000, 85000], g3: [40000, 75000] },
-        priority: { g1: [50000, 90000], g2: [45000, 80000], g3: [35000, 70000] },
-        special: { g1: [45000, 85000], g2: [40000, 75000], g3: [30000, 65000] }
-    };
+    <script>
+        const thresholds = {
+            capital: { g1: [62000, 100000], g2: [55000, 90000], g3: [45000, 80000] },
+            local: { g1: [55000, 95000], g2: [50000, 85000], g3: [40000, 75000] },
+            priority: { g1: [50000, 90000], g2: [45000, 80000], g3: [35000, 70000] },
+            special: { g1: [45000, 85000], g2: [40000, 75000], g3: [30000, 65000] }
+        };
 
-    const basicRates = {
-        general: 0.2, youth: 0.3, senior: 0.3, child2: 0.3, child3: 0.5, lowIncome: 0.533
-    };
+        const basicRates = {
+            general: 0.2, youth: 0.3, senior: 0.3, child2: 0.3, child3: 0.5, lowIncome: 0.533
+        };
 
-    const groupMapping = {
-        general: 'g1', youth: 'g2', senior: 'g2', child2: 'g2', child3: 'g3', lowIncome: 'g3'
-    };
+        const groupMapping = {
+            general: 'g1', youth: 'g2', senior: 'g2', child2: 'g2', child3: 'g3', lowIncome: 'g3'
+        };
 
-    const fmt = (num) => new Intl.NumberFormat('ko-KR').format(Math.floor(num));
+        const fmt = (num) => new Intl.NumberFormat('ko-KR').format(Math.floor(num));
 
-    function syncValues(type, source) {
-        const slider = document.getElementById(type + 'Slider');
-        const input = document.getElementById(type + 'Input');
-        if (source === 'slider') input.value = slider.value;
-        else {
-            if(Number(input.value) > 300000) input.value = 300000;
-            slider.value = input.value;
-        }
-        calculate();
-    }
-
-    function adjustValue(type, amount) {
-        const input = document.getElementById(type + 'Input');
-        let currentVal = Number(input.value) || 0;
-        let newVal = currentVal + amount;
-        if (newVal < 0) newVal = 0;
-        if (newVal > 300000) newVal = 300000;
-        input.value = newVal;
-        syncValues(type, 'input');
-    }
-
-    function calculate() {
-        const region = document.getElementById('region').value;
-        const userType = document.getElementById('userType').value;
-        
-        const genSpend = Number(document.getElementById('generalInput').value) || 0;
-        const plusSpend = Number(document.getElementById('plusInput').value) || 0;
-        const totalSpend = genSpend + plusSpend;
-
-        const group = groupMapping[userType];
-        const limits = thresholds[region][group]; 
-        const limitGen = limits[0];
-        const limitPlus = limits[1];
-        const rate = basicRates[userType];
-
-        document.getElementById('limitGenDisplay').textContent = fmt(limitGen) + "원";
-        document.getElementById('limitPlusDisplay').textContent = fmt(limitPlus) + "원";
-
-        const refundBasic = Math.floor(totalSpend * rate);
-        let refundEveryoneGen = Math.max(0, genSpend - limitGen);
-        let refundEveryonePlus = Math.max(0, totalSpend - limitPlus);
-
-        const maxRefund = Math.max(refundBasic, refundEveryoneGen, refundEveryonePlus);
-        
-        let bestMethod = "";
-        let themeClass = "theme-basic";
-
-        if (maxRefund === refundBasic) {
-            bestMethod = "기본 K-패스 (정률형)";
-            themeClass = "theme-basic";
-        } else if (maxRefund === refundEveryoneGen) {
-            bestMethod = "모두의 카드 (일반형)";
-            themeClass = "theme-general";
-        } else {
-            bestMethod = "모두의 카드 (플러스형)";
-            themeClass = "theme-plus";
+        function syncValues(type, source) {
+            const slider = document.getElementById(type + 'Slider');
+            const input = document.getElementById(type + 'Input');
+            if (source === 'slider') input.value = slider.value;
+            else {
+                if (Number(input.value) > 300000) input.value = 300000;
+                slider.value = input.value;
+            }
+            updateSliderTrack(slider); // [Hybrid Fix] 트랙 색상 업데이트
+            calculate();
         }
 
-        const resultBox = document.getElementById('resultBox');
-        resultBox.className = `result-box ${themeClass}`;
-        
-        document.getElementById('appliedMethodBadge').textContent = "최적 적용: " + bestMethod;
-        document.getElementById('totalSpend').textContent = fmt(totalSpend);
-        document.getElementById('refundAmount').textContent = fmt(maxRefund);
-        document.getElementById('realCost').textContent = fmt(totalSpend - maxRefund);
+        // [Hybrid Fix] 슬라이더 배경(Gradient) 동적 업데이트
+        function updateSliderTrack(slider) {
+            const min = Number(slider.min) || 0;
+            const max = Number(slider.max) || 100;
+            const val = Number(slider.value) || 0;
 
-        const tbody = document.getElementById('comparisonBody');
-        tbody.innerHTML = `
+            const percentage = ((val - min) / (max - min)) * 100;
+
+            // 색상 결정 
+            let color = "#adb5bd"; // 기본
+            if (slider.id.includes('general')) {
+                // [Hue Rotation Fix] 실제로는 Blue를 그리고, CSS filter로 Green으로 보이게 함
+                color = "#228be6";
+            }
+            else if (slider.id.includes('plus')) color = "#228be6";
+
+            // Gradient 배경 적용 (트랙 채움 효과)
+            slider.style.backgroundImage = `linear-gradient(to right, ${color} 0%, ${color} ${percentage}%, #e9ecef ${percentage}%, #e9ecef 100%)`;
+        }
+
+        function adjustValue(type, amount) {
+            const input = document.getElementById(type + 'Input');
+            let currentVal = Number(input.value) || 0;
+            let newVal = currentVal + amount;
+            if (newVal < 0) newVal = 0;
+            if (newVal > 300000) newVal = 300000;
+            input.value = newVal;
+            syncValues(type, 'input');
+        }
+
+        // 초기화
+        window.addEventListener('DOMContentLoaded', () => {
+            updateSliderTrack(document.getElementById('generalSlider'));
+            updateSliderTrack(document.getElementById('plusSlider'));
+            calculate();
+        });
+
+        function calculate() {
+            const region = document.getElementById('region').value;
+            const userType = document.getElementById('userType').value;
+
+            const genSpend = Number(document.getElementById('generalInput').value) || 0;
+            const plusSpend = Number(document.getElementById('plusInput').value) || 0;
+            const totalSpend = genSpend + plusSpend;
+
+            const group = groupMapping[userType];
+            const limits = thresholds[region][group];
+            const limitGen = limits[0];
+            const limitPlus = limits[1];
+            const rate = basicRates[userType];
+
+            document.getElementById('limitGenDisplay').textContent = fmt(limitGen) + "원";
+            document.getElementById('limitPlusDisplay').textContent = fmt(limitPlus) + "원";
+
+            const refundBasic = Math.floor(totalSpend * rate);
+            let refundEveryoneGen = Math.max(0, genSpend - limitGen);
+            let refundEveryonePlus = Math.max(0, totalSpend - limitPlus);
+
+            const maxRefund = Math.max(refundBasic, refundEveryoneGen, refundEveryonePlus);
+
+            let bestMethod = "";
+            let themeClass = "theme-basic";
+
+            if (maxRefund === refundBasic) {
+                bestMethod = "기본 K-패스 (정률형)";
+                themeClass = "theme-basic";
+            } else if (maxRefund === refundEveryoneGen) {
+                bestMethod = "모두의 카드 (일반형)";
+                themeClass = "theme-general";
+            } else {
+                bestMethod = "모두의 카드 (플러스형)";
+                themeClass = "theme-plus";
+            }
+
+            const resultBox = document.getElementById('resultBox');
+            resultBox.className = `result-box ${themeClass}`;
+
+            document.getElementById('appliedMethodBadge').textContent = "최적 적용: " + bestMethod;
+            document.getElementById('totalSpend').textContent = fmt(totalSpend);
+            document.getElementById('refundAmount').textContent = fmt(maxRefund);
+
+            // K-패스/모두의 카드 기준 실부담금
+            const kpassRealCost = totalSpend - maxRefund;
+            document.getElementById('realCost').textContent = fmt(kpassRealCost);
+
+            // --- 기후동행카드 비교 로직 (수도권 한정) ---
+            let climateHtml = '';
+            let climateRowHtml = '';
+
+            if (region === 'capital') {
+                // 기후동행카드 가격 (따릉이 제외 기준)
+                // 청년(만19~39세) 55,000원, 그 외 62,000원
+                const climateCardPrice = (userType === 'youth') ? 55000 : 62000;
+
+                // 기후동행 실부담 = 카드값 + 플러스이용금액(별도)
+                const climateRealCost = climateCardPrice + plusSpend;
+                const diff = climateRealCost - kpassRealCost; // 양수면 K패스가 이득, 음수면 기후동행이 이득
+
+                let diffText = "";
+                let diffClass = "";
+                let diffColor = "";
+
+                if (diff > 0) {
+                    diffText = `${fmt(diff)}원 손해`;
+                    diffColor = "#fa5252"; // 붉은색 (손해)
+                } else if (diff < 0) {
+                    diffText = `${fmt(Math.abs(diff))}원 이득`;
+                    diffColor = "#228be6"; // 파란색 (이득)
+                } else {
+                    diffText = "동일";
+                    diffColor = "#888";
+                }
+
+                // 결과 박스 하단 표시용 HTML
+                climateHtml = `
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(0,0,0,0.1); width: 100%;">
+                    <div style="font-size: 0.95em; color: #555; margin-bottom: 5px;">
+                        🎟️ <strong>기후동행카드</strong> 사용 시
+                        <span style="font-size: 0.85em; color: #888; font-weight: normal;">
+                            (${userType === 'youth' ? '청년' : '일반'} ${fmt(climateCardPrice)}원 + 플러스 별도)
+                        </span>
+                    </div>
+                    <div style="font-size: 1.1em; font-weight: bold;">
+                        실부담 <span style="font-family: inherit;">${fmt(climateRealCost)}</span>원
+                        <span style="margin-left: 8px; font-size: 0.95em; color: ${diffColor}; background: rgba(255,255,255,0.5); padding: 2px 6px; border-radius: 4px;">
+                            (${diffText})
+                        </span>
+                    </div>
+                </div>
+            `;
+
+                // 비교 테이블용 행 HTML
+                const isClimateWinner = (diff < 0);
+                climateRowHtml = `
+                <tr class="${isClimateWinner ? 'winner-row' : ''}" style="border-top: 2px solid #eee;">
+                    <td>기후동행카드</td>
+                    <td>
+                        카드 ${fmt(climateCardPrice)}원<br>
+                        <span style="font-size:0.85em; color:#888;">+ 플러스 ${fmt(plusSpend)}원</span>
+                    </td>
+                    <td>
+                        -
+                    </td>
+                </tr>
+            `;
+            }
+
+            // 결과 박스에 기후동행 비교 구문 추가 (기존 내용 뒤에 append)
+            // 주의: 매번 innerHTML을 덮어쓰므로, 위에서 계산된 값들을 안전하게 넣어야 함.
+            // 기존 DOM 구조를 유지하면서 추가하기 위해 아래와 같이 처리하지 않고
+            // eq-value 밑에 별도 공간을 미리 만들어두거나, 여기서 innerHTML을 조작.
+            // 여기서는 간단히 resultBox 내부의 마지막에 추가된 div가 있다면 갱신, 없다면 추가하는 방식보다는
+            // 매번 새로 그리는 기존 로직(calculate 함수 내에서 값만 변경)과 달리
+            // 구조를 변경해야 하므로, 위쪽에서 equation-wrapper 다음 요소로 제어하는 것이 좋음.
+
+            // 현재 resultBox 구조: badge -> equation-wrapper
+            // 따라서 equation-wrapper 뒤에 climate-info div를 찾아서 업데이트하거나 추가.
+
+            let climateInfoDiv = document.getElementById('climateInfo');
+            if (!climateInfoDiv) {
+                climateInfoDiv = document.createElement('div');
+                climateInfoDiv.id = 'climateInfo';
+                // equation-wrapper 바로 뒤에 삽입
+                const wrapper = resultBox.querySelector('.equation-wrapper');
+                if (wrapper) wrapper.after(climateInfoDiv);
+                else resultBox.appendChild(climateInfoDiv);
+            }
+            climateInfoDiv.innerHTML = climateHtml;
+
+
+            const tbody = document.getElementById('comparisonBody');
+            tbody.innerHTML = `
             <tr class="${maxRefund === refundBasic ? 'winner-row' : ''}">
                 <td>기본형</td>
-                <td>${(rate*100).toFixed(1)}% 적립</td>
+                <td>${(rate * 100).toFixed(1)}% 적립</td>
                 <td>${fmt(refundBasic)}원</td>
             </tr>
             <tr class="${maxRefund === refundEveryoneGen ? 'winner-row' : ''}">
@@ -386,10 +854,25 @@
                 <td>총액 - ${fmt(limitPlus)}원</td>
                 <td>${fmt(refundEveryonePlus)}원</td>
             </tr>
+            ${climateRowHtml}
         `;
-    }
 
-    calculate();
-</script>
+            // 5. [15회 미만 이용 시 경고] 
+            // 기준: 기본요금 1,500원 기준 15회 = 22,500원
+            const warningMsg = document.getElementById('warning-msg');
+
+            // 0원일 때는 경고 숨김 (초기 상태 혹은 입력 중)
+            if (warningMsg) {
+                if (totalSpend > 0 && totalSpend < 22500) {
+                    warningMsg.style.display = 'block';
+                } else {
+                    warningMsg.style.display = 'none';
+                }
+            }
+        }
+
+        calculate();
+    </script>
 </body>
+
 </html>
